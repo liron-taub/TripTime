@@ -48,7 +48,10 @@ public class LocationView extends AppCompatActivity {
         reviews.sort((r1, r2) -> r1.date.compareTo(r2.date) * -1);
 
         ImageButton backButton = findViewById(R.id.back_button);
-        backButton.setOnClickListener(v -> onBackPressed());
+        backButton.setOnClickListener(v -> {
+            Intent i = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(i);
+        });
 
         ImageButton newReview = findViewById(R.id.create_review);
         newReview.setOnClickListener(v -> {

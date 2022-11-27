@@ -18,10 +18,13 @@ public class FirebaseManagement {
     public final String REVIEWS = "REVIEWS";
     public final String NAME = "NAME";
     public final HashMap<String, List<Review>> locationsAndReviews;
+    public static GPSDetector detector;
 
     private FirebaseManagement() {
         this.locationsAndReviews = new HashMap<>();
         db = FirebaseFirestore.getInstance();
+
+        db.collection(LOCATIONS).addSnapshotListener((x, y) -> getAllLocations());
     }
 
     public static FirebaseManagement getInstance() {
@@ -57,7 +60,9 @@ public class FirebaseManagement {
         }
     }
 
-    public void getAllLocations(GPSDetector detector) {
+    public void getAllLocations() {
+        if (detector == null) return;
+
         db.collection(LOCATIONS).get().addOnSuccessListener(command ->
                 command.forEach(queryDocumentSnapshot ->
                         queryDocumentSnapshot.getReference().collection(REVIEWS).get().addOnSuccessListener(task -> {

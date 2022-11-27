@@ -22,12 +22,16 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.jakewharton.rxbinding4.widget.RxSearchView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -42,6 +46,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     List<String> tags = new ArrayList<>(Arrays.asList("שירותים", "נגישות לנכים", "קמפינג", "הדלקת אש", "קפיטריה", "מכונות אוכל", "מקלחת", "4X4"));
     List<String> selectedTags;
     HashMap<String, SearchCriteria> searchCriteriaHashMap;
+
+    String queryText = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,31 +72,13 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         });
 
         searchView = findViewById(R.id.search_view);
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                HashMap<SearchCriteria, Object> searchCriteria = new HashMap<>();
-
-                searchCriteria.put(SearchCriteria.OPEN_TEXT, query);
-
-                for (String tag: selectedTags) {
-                    searchCriteria.put(searchCriteriaHashMap.get(tag), true);
-                }
-
-                HashMap<String, List<Review>> searchResults = FirebaseManagement.getInstance().search(searchCriteria);
-                detector.removeAllMarkers();
-                for (String key : searchResults.keySet()) {
-                    String[] latLang = key.split("-");
-                    detector.addMarker(new LatLng(Double.parseDouble(latLang[0]), Double.parseDouble(latLang[1])), key);
-                }
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                return false;
-            }
-        });
+        RxSearchView.queryTextChanges(searchView)
+                .debounce(500, TimeUnit.MILLISECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(query -> {
+                    queryText = query.toString();
+                    startSearch();
+                });
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -128,7 +116,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     // אתחול של הGPS וזיהוי המיקום
     private void setupMap(@NonNull GoogleMap googleMap) {
         detector = new GPSDetector(googleMap, this);
-        FirebaseManagement.getInstance().getAllLocations(detector);
+        FirebaseManagement.detector = detector;
+        FirebaseManagement.getInstance().getAllLocations();
     }
 
     @Override
@@ -159,6 +148,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         chip.setOnClickListener(v -> selectTag(tag));
         chip.setTag(tag);
         tagsBar.addView(chip);
+
+        startSearch();
     }
 
     private void selectTag(String tag) {
@@ -182,6 +173,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         chip.setOnCloseIconClickListener(v -> unselectTag(tag));
         chip.setTag(tag);
         selectedTagsBar.addView(chip);
+
+        startSearch();
     }
 
     private void initTags() {
@@ -197,5 +190,26 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         tags = new ArrayList<>(searchCriteriaHashMap.keySet());
         selectedTags = new ArrayList<>();
+    }
+
+    private void startSearch() {
+        if (detector == null) return;
+
+        HashMap<SearchCriteria, Object> searchCriteria = new HashMap<>();
+
+        if (!queryText.equals("")) {
+            searchCriteria.put(SearchCriteria.OPEN_TEXT, queryText);
+        }
+
+        for (String tag : selectedTags) {
+            searchCriteria.put(searchCriteriaHashMap.get(tag), true);
+        }
+
+        HashMap<String, List<Review>> searchResults = FirebaseManagement.getInstance().search(searchCriteria);
+        detector.removeAllMarkers();
+        for (String key : searchResults.keySet()) {
+            String[] latLang = key.split("-");
+            detector.addMarker(new LatLng(Double.parseDouble(latLang[0]), Double.parseDouble(latLang[1])), key);
+        }
     }
 }

@@ -12,12 +12,12 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
 import com.example.myapplicationdemo.LocationView;
 import com.example.myapplicationdemo.R;
 import com.example.myapplicationdemo.model.FirebaseManagement;
-import com.example.myapplicationdemo.model.Review;
 import com.example.myapplicationdemo.view.ReviewEditor;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -28,27 +28,27 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 // מטרת המחלקה למצוא את המיקום האוטומטי של איפה שאנחנו נמצאים
-public class GPSDetector implements LocationListener {
+public class GPSDetector implements LocationListener, GoogleMap.OnMapLongClickListener {
 
     // Acquire a reference to the system Location Manager
     LocationManager locationManager;
 
     private final GoogleMap map;
     private final Context context;
-    private boolean moveToCurrentLocation;
     Marker currentLocationMarker;
     List<Marker> markers = new ArrayList<>();
     public LatLng currentLocation;
+    public boolean firstZoom;
 
     public GPSDetector(GoogleMap map, Context context) {
         this.map = map;
         this.context = context;
-        this.moveToCurrentLocation = true;
+        this.firstZoom = true;
+
+        this.map.setOnMapLongClickListener(this);
 
         // צריך לקשר מסך חדש
         map.setOnInfoWindowClickListener(marker -> openLocationScreen(marker.getTag().toString()));
@@ -61,28 +61,22 @@ public class GPSDetector implements LocationListener {
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);// מתחיל להאזין לשינויים של הגי פי אס במידה וקיימת הרשאה
     }
 
-    public void setMoveToCurrentLocation(boolean moveToCurrentLocation) {
-        this.moveToCurrentLocation = moveToCurrentLocation;
-    }
-
     public void removeAllMarkers() {
         map.clear();
     }
 
     @Override
     public void onLocationChanged(Location location) {
-        if (moveToCurrentLocation) {
-            currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
-            if (this.currentLocationMarker != null) {
-                this.currentLocationMarker.remove();
-            }
-            boolean zoomIn = this.currentLocationMarker == null;
-            addMarker(currentLocation);
-
-            if (zoomIn) {
-                moveAndZoom(currentLocation);
-            }
+        currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
+        if (this.currentLocationMarker != null) {
+            this.currentLocationMarker.remove();
         }
+        addMarker(currentLocation);
+
+        if (firstZoom) {
+            moveAndZoom(currentLocation);
+        }
+        firstZoom = false;
     }
 
     public void addMarker(LatLng latLng) {
@@ -105,9 +99,6 @@ public class GPSDetector implements LocationListener {
                     .snippet("לחץ על מנת להוסיף מידע חדש"));
             marker.setTag(markerTag);
             this.markers.add(marker);
-
-//            if (latLng != null)
-//                moveAndZoom(latLng);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -122,10 +113,9 @@ public class GPSDetector implements LocationListener {
         Toast.makeText(context, "לזיהוי מיקום אוטמטי הפעל GPS", Toast.LENGTH_LONG).show();
     }
 
-    // כאשר רוצים להפסיק להקשיב לגי פי אס
-    public void stopListeners() {
-        locationManager.removeUpdates(this);
-        locationManager = null;
+    @Override
+    public void onMapLongClick(@NonNull LatLng point) {
+        addMarker(point);
     }
 
     public void moveAndZoom(LatLng location) {
