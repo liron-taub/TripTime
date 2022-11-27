@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@drawable/empty_tall_divider"
+        android:orientation="vertical"
+        android:padding="30dp"
+        android:showDividers="middle">
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/CustomTextInputStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="שם המקום">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/name_of_place"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/CustomTextInputStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="שם נותן הביקורת">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/first_and_last_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/CustomTextInputStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="זמן שהייה מומלץ (בשעות)">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/recommended_stay"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/CustomTextInputStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="סוג רכב מתאים">
+
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                android:id="@+id/suitable_vehicle_type"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <androidx.appcompat.widget.AppCompatCheckBox
+            android:id="@+id/indoor"
+            style="@style/CustomCheckBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="האתר מקורה" />
+
+        <androidx.appcompat.widget.AppCompatCheckBox
+            android:id="@+id/is_there_a_shower"
+            style="@style/CustomCheckBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="יש מקלחת באתר" />
+
+        <androidx.appcompat.widget.AppCompatCheckBox
+            android:id="@+id/is_there_a_toilet"
+            style="@style/CustomCheckBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="יש שירותים באתר" />
+
+        <androidx.appcompat.widget.AppCompatCheckBox
+            android:id="@+id/access_for_disabled"
+            style="@style/CustomCheckBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="יש גישה לנכים" />
+
+        <androidx.appcompat.widget.AppCompatCheckBox
+            android:id="@+id/camping"
+            style="@style/CustomCheckBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="ניתן לעשות קמפינג" />
+
+        <androidx.appcompat.widget.AppCompatCheckBox
+            android:id="@+id/fire"
+            style="@style/CustomCheckBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="ניתן להדליק אש באתר" />
+
+        <androidx.appcompat.widget.AppCompatCheckBox
+            android:id="@+id/cafeteria"
+            style="@style/CustomCheckBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="קיימת קפיטריה באתר" />
+
+        <androidx.appcompat.widget.AppCompatCheckBox
+            android:id="@+id/vendingMachine"
+            style="@style/CustomCheckBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="קיימות מכונות חטיפים באתר" />
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/CustomCheckBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="מתאים לטווח גילאים של" />
+
+            <com.google.android.material.slider.RangeSlider
+                android:id="@+id/age_range"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:valueFrom="0"
+                android:valueTo="120"
+                app:values="@array/initial_slider_values" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/CustomCheckBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="מידת שביעות רצון מהאנשי הצוות" />
+
+            <com.google.android.material.slider.Slider
+                android:id="@+id/satisfaction"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:valueFrom="0"
+                android:valueTo="100" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/CustomCheckBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="מידת שביעות רצון מהניקיון" />
+
+            <com.google.android.material.slider.Slider
+                android:id="@+id/cleanliness"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:valueFrom="0"
+                android:valueTo="100" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/CustomCheckBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="דירוג כללי:" />
+
+            <RatingBar
+                android:id="@+id/rating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:numStars="5" />
+        </LinearLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/CustomTextInputStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="הערות כלליות על האתר">
+
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                android:id="@+id/comment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <Button
+            android:id="@+id/upload"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="שמור"/>
+    </LinearLayout>
+
+</ScrollView>
+
