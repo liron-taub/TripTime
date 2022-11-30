@@ -15,6 +15,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
@@ -33,7 +34,7 @@ import java.util.stream.Collectors;
 
 public class LocationView extends AppCompatActivity {
 
-    LinearLayout serviceButton;
+    private int currentImageIndex = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +47,15 @@ public class LocationView extends AppCompatActivity {
         String latLang = getIntent().getExtras().getString("lat_lang");
         List<Review> reviews = FirebaseManagement.getInstance().locationsAndReviews.get(latLang);
         reviews.sort((r1, r2) -> r1.date.compareTo(r2.date) * -1);
+
+        ImageView imageView = findViewById(R.id.imageView);
+        FirebaseManagement.getInstance().downloadImages(latLang, imageView, this, currentImageIndex);
+
+        ImageButton nextImageButton = findViewById(R.id.next_image_button);
+        nextImageButton.setOnClickListener(v -> {
+            currentImageIndex++;
+            FirebaseManagement.getInstance().downloadImages(latLang, imageView, this, currentImageIndex);
+        });
 
         ImageButton backButton = findViewById(R.id.back_button);
         backButton.setOnClickListener(v -> {
@@ -165,7 +175,8 @@ public class LocationView extends AppCompatActivity {
 
             RecyclerView commentsView = dialogView.findViewById(R.id.comments_recycler_view);
             commentsView.setLayoutManager(new LinearLayoutManager(this));
-            CommentsAdapter adapter = new CommentsAdapter(reviews);
+            List<Review> reviewsWithComment = reviews.stream().filter(review -> review.comment != null && review.comment.length() > 0).collect(Collectors.toList());
+            CommentsAdapter adapter = new CommentsAdapter(reviewsWithComment);
             commentsView.setAdapter(adapter);
 
             AlertDialog dialog = dialogBuilder.create();

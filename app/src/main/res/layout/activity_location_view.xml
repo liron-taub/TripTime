@@ -17,6 +17,32 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:cardCornerRadius="200dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <com.github.mmin18.widget.RealtimeBlurView
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            app:realtimeBlurRadius="50dp"
+            app:realtimeOverlayColor="#4DBFBFBF" />
+
+        <ImageButton
+            android:id="@+id/next_image_button"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:background="@color/transparent"
+            app:srcCompat="@drawable/ic_round_navigate_next_24"
+            app:tint="@color/white" />
+    </androidx.cardview.widget.CardView>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/button_bar"
         android:layout_width="match_parent"

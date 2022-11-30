@@ -4,6 +4,9 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -14,6 +17,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.example.myapplicationdemo.LocationView;
 import com.example.myapplicationdemo.R;
@@ -21,6 +25,7 @@ import com.example.myapplicationdemo.model.FirebaseManagement;
 import com.example.myapplicationdemo.view.ReviewEditor;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -31,15 +36,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 // מטרת המחלקה למצוא את המיקום האוטומטי של איפה שאנחנו נמצאים
-public class GPSDetector implements LocationListener, GoogleMap.OnMapLongClickListener {
-
-    // Acquire a reference to the system Location Manager
+public class GPSDetector implements LocationListener, GoogleMap.OnMapClickListener {
     LocationManager locationManager;
 
     private final GoogleMap map;
     private final Context context;
-    Marker currentLocationMarker;
-    List<Marker> markers = new ArrayList<>();
+    Marker currentLocationMarker, lastClickMarker;
     public LatLng currentLocation;
     public boolean firstZoom;
 
@@ -48,10 +50,8 @@ public class GPSDetector implements LocationListener, GoogleMap.OnMapLongClickLi
         this.context = context;
         this.firstZoom = true;
 
-        this.map.setOnMapLongClickListener(this);
-
-        // צריך לקשר מסך חדש
-        map.setOnInfoWindowClickListener(marker -> openLocationScreen(marker.getTag().toString()));
+        this.map.setOnMapClickListener(this);
+        this.map.setOnInfoWindowClickListener(marker -> openLocationScreen(marker.getTag().toString()));
 
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);// פונקציה של אדרואיד שיודעת לזהות את המיקום האוטומטי לוקח את זה מתוך הקונטקסט
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
@@ -71,7 +71,7 @@ public class GPSDetector implements LocationListener, GoogleMap.OnMapLongClickLi
         if (this.currentLocationMarker != null) {
             this.currentLocationMarker.remove();
         }
-        addMarker(currentLocation);
+        this.currentLocationMarker = addMarker(currentLocation, R.drawable.ic_round_my_location);
 
         if (firstZoom) {
             moveAndZoom(currentLocation);
@@ -79,29 +79,42 @@ public class GPSDetector implements LocationListener, GoogleMap.OnMapLongClickLi
         firstZoom = false;
     }
 
-    public void addMarker(LatLng latLng) {
-        addMarker(latLng, latLng.latitude + "-" + latLng.longitude);
+    public Marker addMarker(LatLng latLng, int locationType) {
+        return addMarker(latLng, latLng.latitude + "-" + latLng.longitude, locationType);
     }
 
-    public void addMarker(LatLng latLng, String markerTag) {
+    public Marker addMarker(LatLng latLng, String markerTag, int locationType) {
         try {
-            Address address = new Geocoder(context).getFromLocation(latLng.latitude, latLng.longitude, 1).get(0);
-            latLng = new LatLng(address.getLatitude(), address.getLongitude());
-
-            Location temp = new Location(LocationManager.GPS_PROVIDER);
-            temp.setLatitude(address.getLatitude());
-            temp.setLongitude(address.getLongitude());
+            String placeName = "מקום לא ידוע";
+            if (FirebaseManagement.getInstance().locationsAndReviews.containsKey(markerTag)) {
+                placeName = FirebaseManagement.getInstance().locationsAndReviews.get(markerTag).get(0).placeName;
+            } else {
+                List<Address> addresses = new Geocoder(context).getFromLocation(latLng.latitude, latLng.longitude, 1);
+                if (addresses.size() > 0) {
+                    placeName = addresses.get(0).getAddressLine(0);
+                }
+            }
 
             Marker marker = map.addMarker(new MarkerOptions()
                     .position(latLng)
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.location_icon))
-                    .title(address.getAddressLine(0))
+                    .icon(bitmapDescriptorFromVector(context, locationType))
+                    .title(placeName)
                     .snippet("לחץ על מנת להוסיף מידע חדש"));
             marker.setTag(markerTag);
-            this.markers.add(marker);
+            return marker;
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
+    }
+
+    private BitmapDescriptor bitmapDescriptorFromVector(Context context, int vectorResId) {
+        Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
+        vectorDrawable.setBounds(0, 0, vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());
+        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        vectorDrawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 
     @Override
@@ -111,11 +124,6 @@ public class GPSDetector implements LocationListener, GoogleMap.OnMapLongClickLi
     @Override
     public void onProviderDisabled(String s) {
         Toast.makeText(context, "לזיהוי מיקום אוטמטי הפעל GPS", Toast.LENGTH_LONG).show();
-    }
-
-    @Override
-    public void onMapLongClick(@NonNull LatLng point) {
-        addMarker(point);
     }
 
     public void moveAndZoom(LatLng location) {
@@ -133,5 +141,14 @@ public class GPSDetector implements LocationListener, GoogleMap.OnMapLongClickLi
         Intent switchActivityIntent = new Intent(context, classType);
         switchActivityIntent.putExtra("lat_lang", latLng);
         context.startActivity(switchActivityIntent);
+    }
+
+    @Override
+    public void onMapClick(@NonNull LatLng latLng) {
+        if (this.lastClickMarker != null) {
+            this.lastClickMarker.remove();
+        }
+        this.lastClickMarker = addMarker(latLng, R.drawable.ic_round_new_location);
+        this.lastClickMarker.showInfoWindow();
     }
 }

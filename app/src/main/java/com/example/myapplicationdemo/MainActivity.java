@@ -7,6 +7,7 @@ import androidx.fragment.app.FragmentActivity;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.widget.LinearLayout;
 import android.widget.SearchView;
@@ -16,6 +17,7 @@ import com.example.myapplicationdemo.controller.GPSDetector;
 import com.example.myapplicationdemo.model.FirebaseManagement;
 import com.example.myapplicationdemo.model.Review;
 import com.example.myapplicationdemo.model.SearchCriteria;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -66,7 +68,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         myLocationButton = findViewById(R.id.my_location_button);
         myLocationButton.setOnClickListener(v -> {
             if (detector != null && detector.currentLocation != null) {
-                detector.addMarker(detector.currentLocation);
                 detector.moveAndZoom(detector.currentLocation);
             }
         });
@@ -115,6 +116,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     // אתחול של הGPS וזיהוי המיקום
     private void setupMap(@NonNull GoogleMap googleMap) {
+        LatLng location = new LatLng(32.46508836969692, 35.30493286338767);
+        map.moveCamera(CameraUpdateFactory.newLatLng(location));
+        map.animateCamera(CameraUpdateFactory.zoomTo(8), 2000, null);
         detector = new GPSDetector(googleMap, this);
         FirebaseManagement.detector = detector;
         FirebaseManagement.getInstance().getAllLocations();
@@ -123,6 +127,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         this.map = googleMap;
+        this.map.setTrafficEnabled(true);
         if (permissionsGranted) {
             setupMap(this.map);
         }
@@ -205,11 +210,16 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             searchCriteria.put(searchCriteriaHashMap.get(tag), true);
         }
 
-        HashMap<String, List<Review>> searchResults = FirebaseManagement.getInstance().search(searchCriteria);
-        detector.removeAllMarkers();
-        for (String key : searchResults.keySet()) {
-            String[] latLang = key.split("-");
-            detector.addMarker(new LatLng(Double.parseDouble(latLang[0]), Double.parseDouble(latLang[1])), key);
+        if (searchCriteria.keySet().size() > 0) {
+            HashMap<String, List<Review>> searchResults = FirebaseManagement.getInstance().search(searchCriteria);
+            detector.removeAllMarkers();
+            for (String key : searchResults.keySet()) {
+                String[] latLang = key.split("-");
+                detector.addMarker(new LatLng(Double.parseDouble(latLang[0]), Double.parseDouble(latLang[1])), key, R.drawable.ic_round_location);
+            }
+        } else {
+            detector.removeAllMarkers();
+            FirebaseManagement.getInstance().getAllLocations();
         }
     }
 }
