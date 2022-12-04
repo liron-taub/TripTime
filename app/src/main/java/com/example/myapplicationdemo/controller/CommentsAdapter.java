@@ -65,7 +65,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.ViewHo
             commentWriterName.setText(review.writerName);
 
             DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-            commentDate.setText(dateFormat.format(review.date));
+            commentDate.setText("עודכן לאחרונה בתאריך " + dateFormat.format(review.date));
         }
     }
 }
