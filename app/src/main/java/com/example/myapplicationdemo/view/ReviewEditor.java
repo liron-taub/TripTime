@@ -57,7 +57,7 @@ public class ReviewEditor extends AppCompatActivity {
         String[] latLang = getIntent().getExtras().getString("lat_lang").split("-");
         lat = latLang[0];
         lng = latLang[1];
-
+// שמירת תמונה שמעלה המשתמש של המקום
         selectedImage = findViewById(R.id.selected_image_view);
         selectImageResultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -78,7 +78,7 @@ public class ReviewEditor extends AppCompatActivity {
         selectImage.setOnClickListener(v -> selectImage());
 
 
-        //Creating the instance of ArrayAdapter containing list of fruit names
+        //יוצר רשימה של רכבים
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.select_dialog_item, carOptions);
         //Getting the instance of AutoCompleteTextView
         suitableVehicleType = findViewById(R.id.suitable_vehicle_type);
@@ -88,7 +88,7 @@ public class ReviewEditor extends AppCompatActivity {
             ((AutoCompleteTextView) v).showDropDown();
             return v.performClick();
         });
-
+// קישור הנתונים מה-xml לjava
         ageRange = findViewById(R.id.age_range);
         ageRange.setStepSize(1);
 
@@ -110,7 +110,7 @@ public class ReviewEditor extends AppCompatActivity {
         upload = findViewById(R.id.upload);
         upload.setOnClickListener(v -> upload());
     }
-
+// פונקציה שמעלה את הנתונים לפיירבייס
     private void upload() {
         TextView[] textViews = new TextView[]{nameOfPlace, firstAndLastName, recommendedStay};
         List<String> texts = Arrays.stream(textViews).map(tv -> tv.getText().toString()).collect(Collectors.toList());
@@ -151,7 +151,7 @@ public class ReviewEditor extends AppCompatActivity {
         switchActivityIntent.putExtra("lat_lang", lat + "-" + lng);
         this.startActivity(switchActivityIntent);
     }
-
+// פונקציה שמפעילה את הבחירה של להכניס תמונה ( הכפתור של הוספת תמונה)
     private void selectImage() {
         Intent intent = new Intent();
         intent.setType("image/*");

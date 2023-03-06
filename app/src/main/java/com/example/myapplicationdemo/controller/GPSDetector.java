@@ -67,34 +67,35 @@ public class GPSDetector implements LocationListener, GoogleMap.OnMapClickListen
 
     @Override
     public void onLocationChanged(Location location) {
+        // במידה והמיקום הנוכחי שלי השתנה,  אני ארצה שהוא יציב סימון חדש למיקום הנוכחי שעברתי אליו
         currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
         if (this.currentLocationMarker != null) {
             this.currentLocationMarker.remove();
         }
         this.currentLocationMarker = addMarker(currentLocation, R.drawable.ic_round_my_location);
-
+// בדיקה אם זה הפעם הראשונה שנכנסנו לאפליקציה נרצה שיקרה זום אוטומטי- נועד כדי לטפל בבעיה שעשה כל פעם זום אוטומטי מבלי שביקשנו
         if (firstZoom) {
             moveAndZoom(currentLocation);
         }
         firstZoom = false;
     }
-
+// הוספת סימון של מיקום חדש
     public Marker addMarker(LatLng latLng, int locationType) {
         return addMarker(latLng, latLng.latitude + "-" + latLng.longitude, locationType);
     }
 
     public Marker addMarker(LatLng latLng, String markerTag, int locationType) {
         try {
-            String placeName = "מקום לא ידוע";
-            if (FirebaseManagement.getInstance().locationsAndReviews.containsKey(markerTag)) {
+            String placeName = "מקום לא ידוע";// נועד לטפל כאשר רוצים להוסיף מקום ללא שם
+            if (FirebaseManagement.getInstance().locationsAndReviews.containsKey(markerTag)) {// בדיקה בפיירבייס אם המיקום כבר קיים ואם כן תביא את השם שלו
                 placeName = FirebaseManagement.getInstance().locationsAndReviews.get(markerTag).get(0).placeName;
-            } else {
+            } else {// המיקום לא קיים, לכן נחפש במפה את המיקום עצממו ונביא את השם שלו
                 List<Address> addresses = new Geocoder(context).getFromLocation(latLng.latitude, latLng.longitude, 1);
                 if (addresses.size() > 0) {
                     placeName = addresses.get(0).getAddressLine(0);
                 }
             }
-
+// הוספת המיקום למפה עצמה
             Marker marker = map.addMarker(new MarkerOptions()
                     .position(latLng)
                     .icon(bitmapDescriptorFromVector(context, locationType))
@@ -107,7 +108,7 @@ public class GPSDetector implements LocationListener, GoogleMap.OnMapClickListen
             return null;
         }
     }
-
+//מקבל את הנתון של המיקום וממיר אותו לתמונה= סימון על המפה
     private BitmapDescriptor bitmapDescriptorFromVector(Context context, int vectorResId) {
         Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
         vectorDrawable.setBounds(0, 0, vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());
@@ -122,18 +123,20 @@ public class GPSDetector implements LocationListener, GoogleMap.OnMapClickListen
     }
 
     @Override
+    //כאשר הגי פי אס מכובה
     public void onProviderDisabled(String s) {
         Toast.makeText(context, "לזיהוי מיקום אוטמטי הפעל GPS", Toast.LENGTH_LONG).show();
     }
-
+// פונקציה שעושה זום כאשר מחפשים מיקום, מקבלת מיקום ועושה זום לאותו מקום
     public void moveAndZoom(LatLng location) {
         map.moveCamera(CameraUpdateFactory.newLatLng(location));
         map.animateCamera(CameraUpdateFactory.zoomTo(17), 2000, null);
     }
-
+// פונקציה שאחראית למעבר בין המסך של המפה הראשית לבין המסך של הממיקום הנבחר
     private void openLocationScreen(String latLng) {
+        // באופן דיפולטיבי נכנס למסך של עריכת והוספת מיקום
         Class<?> classType = ReviewEditor.class;
-
+// בדיקה האם המיקום קיים בתוך הפיירבייס אם כן הוא מראה את התצוגה של המיקום עצמו
         if (FirebaseManagement.getInstance().locationsAndReviews.keySet().contains(latLng)) {
             classType = LocationView.class;
         }
@@ -144,6 +147,7 @@ public class GPSDetector implements LocationListener, GoogleMap.OnMapClickListen
     }
 
     @Override
+    // הוספת מיקום חדש במפה איפה שנגענו על המסך
     public void onMapClick(@NonNull LatLng latLng) {
         if (this.lastClickMarker != null) {
             this.lastClickMarker.remove();

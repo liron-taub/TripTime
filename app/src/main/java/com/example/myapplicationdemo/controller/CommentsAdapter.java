@@ -16,6 +16,7 @@ import java.util.List;
 
 public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.ViewHolder> {
     List<Review> reviews;
+    // RecyclerView - כמו גלגל ענק שמצייג את התשובות של הביקורות ובכך מונע בזבוז משאבים
 
     public CommentsAdapter(List<Review> reviews) {
         this.reviews = reviews;
@@ -29,6 +30,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.ViewHo
                 .inflate(R.layout.comment_view_holder, viewGroup, false);
 
         return new ViewHolder(view);
+        // יוצר את הקוביה של הביקורת ( הקרונות בגלגל ענק)
     }
 
     // Replace the contents of a view (invoked by the layout manager)
@@ -38,7 +40,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.ViewHo
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
         viewHolder.setComment(reviews.get(position));
-    }
+    }// משבץ לתוך הקוביה של הביקורת את הביקורת עצמה שצריכה להיות מוצגת
 
     // Return the size of your dataset (invoked by the layout manager)
     @Override
@@ -67,5 +69,6 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.ViewHo
             DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
             commentDate.setText(dateFormat.format(review.date));
         }
+        // מכניס את הנתונים לתוך הקוביה של הביקורת
     }
 }

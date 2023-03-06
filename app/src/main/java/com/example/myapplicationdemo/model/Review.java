@@ -4,7 +4,7 @@ import android.location.Location;
 
 import java.io.Serializable;
 import java.util.Date;
-
+// שמירת כל הנתונים שקשורים למיקום
 public class Review implements Serializable {
     public String placeName;
     public String writerName;

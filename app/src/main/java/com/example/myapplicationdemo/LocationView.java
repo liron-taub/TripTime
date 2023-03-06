@@ -43,7 +43,7 @@ public class LocationView extends AppCompatActivity {
 
         getSupportActionBar().hide();
 
-        // get the list of all the reviews
+        // לקחת את כל הביקורות שיש לנו על המיקום הספציפי ולמיין אותם לפי התאריך מהחדש לישן
         String latLang = getIntent().getExtras().getString("lat_lang");
         List<Review> reviews = FirebaseManagement.getInstance().locationsAndReviews.get(latLang);
         reviews.sort((r1, r2) -> r1.date.compareTo(r2.date) * -1);
@@ -51,18 +51,19 @@ public class LocationView extends AppCompatActivity {
         ImageView imageView = findViewById(R.id.imageView);
         FirebaseManagement.getInstance().downloadImages(latLang, imageView, this, currentImageIndex);
 
+        // במידה ויש מקום מסוים שיש לו כמה תמונות, אז שנוכל לעבור על כולם
         ImageButton nextImageButton = findViewById(R.id.next_image_button);
         nextImageButton.setOnClickListener(v -> {
             currentImageIndex++;
             FirebaseManagement.getInstance().downloadImages(latLang, imageView, this, currentImageIndex);
         });
-
+// חץ לחזור אחורה למסך הראשי של המפה
         ImageButton backButton = findViewById(R.id.back_button);
         backButton.setOnClickListener(v -> {
             Intent i = new Intent(getApplicationContext(), MainActivity.class);
             startActivity(i);
         });
-
+// כפתור עריכת מיקום חדש וקיים
         ImageButton newReview = findViewById(R.id.create_review);
         newReview.setOnClickListener(v -> {
             Intent i = new Intent(getApplicationContext(), ReviewEditor.class);
@@ -70,10 +71,10 @@ public class LocationView extends AppCompatActivity {
             startActivity(i);
         });
 
-        // show the of the location
+        // הצגת השם של המקום
         TextView name = findViewById(R.id.name);
         name.setText(reviews.get(0).placeName);
-
+    //חישובים עבור תצוגה של הביקורת (ממוצע , לסמן הערות,מלל כללי)
         TextView recommendedStay = findViewById(R.id.recommended_stay_textview);
         recommendedStay.setText((int) avg(reviews.stream().map(review -> (float) review.recommendedStay).collect(Collectors.toList())) + " שעות");
 
@@ -166,7 +167,7 @@ public class LocationView extends AppCompatActivity {
             dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
             dialog.show();
         });
-
+        //הצגת כל הביקורות
         findViewById(R.id.comments).setOnClickListener(v -> {
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
             LayoutInflater inflater = this.getLayoutInflater();

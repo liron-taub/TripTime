@@ -40,6 +40,7 @@ public class FirebaseManagement {
     public static GPSDetector detector;
 
     private FirebaseManagement() {
+        // השתמשנו בתבנית עיצוב סינגלטו= אפשרות ליצירה של מופע אחד יחיד כי אנחנו מתחברים לשרת ונרצה שזה יקרה חד פעמי ולא כל פעם מחדש.
         this.locationsAndReviews = new HashMap<>();
         db = FirebaseFirestore.getInstance();
         FirebaseStorage storage = FirebaseStorage.getInstance();
@@ -54,7 +55,7 @@ public class FirebaseManagement {
         }
         return instance;
     }
-
+// הוספת הביקורת עצמה למיקום המתאים שאליו היא שייכת מתוך כל המיקומים הקיימים בפיירבייס
     public void saveReview(Review review) {
         String locationKey = review.latitude + "-" + review.longitude;
 
@@ -63,14 +64,14 @@ public class FirebaseManagement {
                 .document(locationKey)
                 .collection(REVIEWS)
                 .add(review);
-
+//במידה וערכו את המיקום ושינו בעריכה את שם המיקום לדוגמה לקולנוע קראו גלובוס מקס ושינו אותו להוט סינמה אז שישמור את השם המעודכן של המיקום
         HashMap<String, Object> map = new HashMap<>();
         map.put(NAME, review.placeName);
         db
                 .collection(LOCATIONS)
                 .document(locationKey)
                 .set(map);
-
+// עידכנו עד עכשיו בשרת ונרצה להוסיף את המיקום החדש גם לעותק הלוקאלי
         if (locationsAndReviews.containsKey(locationKey)) {
             locationsAndReviews.get(locationKey).add(review);
         } else {
@@ -79,7 +80,7 @@ public class FirebaseManagement {
             locationsAndReviews.put(locationKey, reviews);
         }
     }
-
+// יוצר את העותק המקומי של הנתונים שנמצאים על השרת, הורדת כל המקומות על מנת שנוכל להציג אותם במפה כאשר מעלים את האפליקציה
     public void getAllLocations() {
         if (detector == null) return;
 
@@ -95,7 +96,7 @@ public class FirebaseManagement {
                         })))
                 .addOnFailureListener(command -> System.out.println(""));
     }
-
+// העלת תמונה למיקום שאנחנו מוסיפים למפה, באמצעות פייסטור שיודע לשמור קבצים
     public void uploadImage(Uri filePath, String location, Context context) {
         if (filePath != null) {
             ProgressDialog progressDialog = new ProgressDialog(context);
@@ -116,7 +117,7 @@ public class FirebaseManagement {
                     .addOnFailureListener(e -> {
                         progressDialog.dismiss();
                     })
-
+// מראה את קצב ההתקדמות של העלת התמונה במידה וזה קובץ גדול.
                     .addOnProgressListener(
                             taskSnapshot -> {
                                 double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
@@ -124,7 +125,7 @@ public class FirebaseManagement {
                             });
         }
     }
-
+// הורדת התמונה מתוך הפיירסטור על מנת לעלות אותה לתצוגה לממיקום ספציפי שיש לו כמה תמונות 1+
     public void downloadImages(String location, ImageView imageView, Context context, int index) {
         try {
             this.imageView = imageView;
@@ -141,11 +142,12 @@ public class FirebaseManagement {
         } catch (Exception ex) {
         }
     }
-
+// פונקציה שאחראית לחיפוש מיקום ידני או לפי תגיות
     public HashMap<String, List<Review>> search(HashMap<SearchCriteria, Object> criteria) {
         Stream<Map.Entry<String, List<Review>>> result = new HashMap<>(locationsAndReviews).entrySet().stream();
 
         for (SearchCriteria criterion : criteria.keySet()) {
+            // חיפוש שמסנן באמצעות פילטרים את החיפוש הספציפי אותו אנחנו רוצים
             switch (criterion) {
                 case OPEN_TEXT:
                     result = result.filter(
@@ -207,7 +209,7 @@ public class FirebaseManagement {
 
         return result.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (prev, next) -> next, HashMap::new));
     }
-
+// אחראית לחישוב ממוצע בוליאני לשאלות של כן ולא וכך בחיפוש יודע להציג תוצאות נכונות לפי מה שהרוב קובעים
     private int calculateBooleanAvg(List<Boolean> booleans) {
         return (int) (100 * ((float) booleans.stream().filter(b -> b).count() / booleans.size()));
     }

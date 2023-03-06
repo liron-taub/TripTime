@@ -9,6 +9,7 @@ import com.example.myapplicationdemo.R;
 public class LocationProfile extends AppCompatActivity {
 
     @Override
+    // מקשרת בין הxml לבין הגאבה
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.copy);

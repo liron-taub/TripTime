@@ -55,7 +55,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        // פונקציה חיפוש
         checkPermissions();
 
         initTags();
@@ -132,7 +132,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             setupMap(this.map);
         }
     }
-
+// ביטול טאג בחיפוש
     private void unselectTag(String tag) {
         if (selectedTagsBar.findViewWithTag(tag) != null) {
             selectedTagsBar.removeView(selectedTagsBar.findViewWithTag(tag));
@@ -156,7 +156,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         startSearch();
     }
-
+// ללחוץ על טאג בחיפוש
     private void selectTag(String tag) {
         if (tagsBar.findViewWithTag(tag) != null) {
             tagsBar.removeView(tagsBar.findViewWithTag(tag));
@@ -197,6 +197,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         selectedTags = new ArrayList<>();
     }
 
+    // תתחיל חיפוש , בודק לפי טקסט חופשי ואז לפי טאגים ואז לפי אם קיימים כמה קריטריונים לחיפוש או רק אחד
     private void startSearch() {
         if (detector == null) return;
 
@@ -217,6 +218,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 String[] latLang = key.split("-");
                 detector.addMarker(new LatLng(Double.parseDouble(latLang[0]), Double.parseDouble(latLang[1])), key, R.drawable.ic_round_location);
             }
+            // אם אין  מקום ספציפי לחפש תחזיר את כל התוצאות
         } else {
             detector.removeAllMarkers();
             FirebaseManagement.getInstance().getAllLocations();
