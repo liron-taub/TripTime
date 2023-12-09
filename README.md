@@ -1,4 +1,5 @@
 # TripTime
+nofar taub & liron taub
 
 This project is our final project in which we created an application that aims to encourage people to go out and travel in Israel despite the difficulties involved in doing so, such as lack of knowledge about the location and more.
 
